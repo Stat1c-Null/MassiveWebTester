@@ -16,7 +16,7 @@ def get_url_status(urls, maxCounter):  # checks status for each url in list urls
             print(url + "\tStatus: " + str(r.status_code) + " - " + str(urlCounter) + "/" + str(maxCounter))
             statusCode.append(r.status_code)
         except Exception as e:
-            print(url + "\tNA FAILED TO CONNECT\t" + str(urlCounter))
+            print(url + "\tNA FAILED TO CONNECT\t" + str(urlCounter) + "/" + str(maxCounter))
             statusCode.append(1)
     return None
 
@@ -25,7 +25,15 @@ def get_redirect_link(urls, maxCounter):
     for url in urls:
         redirectCounter += 1
         try:
-            redirect = requests.get(url)
+            #Check for more than one redirect
+            while True:
+                redirect = requests.get(url)
+                doubleRedirect = requests.get(redirect.url)
+                if str(redirect.url) != str(doubleRedirect.url):#Check if first redirect equals to second redirect
+                    url = doubleRedirect.url
+                    print(str(redirect.url) + " redirects to " + str(doubleRedirect.url) + ". Looking for more")
+                else:
+                    break
             if str(redirect.url) == str(url) + "/":
                 urlRedirect.append("No")
                 print(url + " - no redirect" + " - " + str(redirectCounter) + "/" + str(maxCounter))
@@ -103,7 +111,7 @@ def main():
                 file.write("No\n")
             else:
                 file.write(str(statusCode[i]) + "\n")
-    urlCounter = 0
+    #urlCounter = 0
 
 if __name__ == "__main__":
     main()
